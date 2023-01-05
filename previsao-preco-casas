@@ -1,0 +1,71 @@
+#importando a biblioteca
+
+library(ggplot2)
+
+options(repr.plot.width = 12, repr.plot.height = 8)
+
+#mostrando o topo da base de dados
+
+data <- read.csv(file = 'data.csv')
+head(data)
+
+
+#mostrando o final da base de dados
+
+tail(data)
+
+
+#resumo dos dados
+summary(data)
+
+
+#criando um DataFrame principal, com as colunas que serão utilizadas adiante.
+maindf <- data[,c("price","bedrooms","sqft_living","floors",
+                  "sqft_lot", "condition", "view", "yr_built")]
+                  
+head(maindf)
+#mostrando o topo do DataFrame
+
+
+maindf$oldbuilt <- as.integer(format(Sys.Date(), "%Y")) - maindf$yr_built
+
+drops <- c("yr_built")
+maindf = maindf[ , !(names(maindf) %in% drops)]
+
+
+#matriz de correlação
+cor(maindf)
+
+
+#mostrando gráficos
+pairs(~bedrooms + sqft_living + floors + condition, data = maindf,
+       main = "Scatterplot Matrix")
+ 
+ 
+ #'plotando' informações
+theme_set(theme_bw()) 
+g <- ggplot(maindf, aes(bedrooms, floors))
+g + geom_count(col="tomato3", show.legend=F) +
+  labs(y="floors", 
+       x="bedrooms", 
+       title="Bedrooms vs Floors")
+       
+plot(x = maindf$sqft_living, y = maindf$sqft_lot,
+     xlab = "sqft_living",
+     ylab = "sqft_lot",
+     xlim = c(0, 3000), 
+     ylim = c(0, 20000),
+     main = "sqft_living vs sqft_lot"
+)
+
+
+
+#regressão linear entre as estatísticas da área (sqft_living) e preco(price)
+ggplot(maindf,aes(y=price,x=sqft_living)) +
+       geom_point() + 
+        xlim(0, 9000) +
+        ylim(0, 5000000) +
+        geom_smooth(formula = y ~ x,method="lm")
+        
+        
+#do gráfico, percebe-se uma correlação alta entre a área da sala de estar, e o preço dos imóveis.
